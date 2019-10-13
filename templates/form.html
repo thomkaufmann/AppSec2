@@ -1,0 +1,45 @@
+<html>
+   <body>
+       <ul>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('spell_check') }}">Spell Check</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+       </ul>
+        
+       {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p id="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}       
+        <h1>{{ "Register" if (type == 'Register') else "Login" }}</h1>   
+        <form action = "/{{ 'register' if (type == 'Register') else 'login' }}" method = "POST">
+            {{ form.csrf_token }}
+            {% if type != '2FA' %}
+                <p>{{ form.uname.label }}</p>
+                <p>{{ form.uname(size=20) }}</p>
+                {% for error in form.uname.errors %}
+                <p style="color: red;">[{{ error }}]</p>
+                {% endfor %}                     
+                <!-- <p><input type = 'text' name = 'uname'/></p> -->
+                <p>{{ form.pword.label }}</p> 
+                <p>{{ form.pword(size=20) }}</p>     
+                {% for error in form.pword.errors %}
+                <p style="color: red;">[{{ error }}]</p>
+                {% endfor %}   
+            {% endif %}  
+            {% if type != 'Login' %}
+                <!-- <p><input type = 'password' name = 'pword'/></p> -->
+                <p>{{ form.pin.label }}</p> 
+                <p>{{ form.pin(size=20) }}</p>   
+                {% for error in form.pin.errors %}
+                <p style="color: red;">[{{ error }}]</p>
+                {% endfor %}        
+            {% endif %}
+            <!-- <p><input type = 'text' name = '2fa'/></p> -->
+            <p>{{ form.submit() }}</p>
+        </form>
+    </body>
+</html>
