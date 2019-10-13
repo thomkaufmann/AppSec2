@@ -54,7 +54,9 @@
                 <p>{{ form.pin(size=20) }}</p>   
                 {% for error in form.pin.errors %}
                 <p style="color: red;">[{{ error }}]</p>
-                {% endfor %}        
+                {% endfor %} 
+            {% else %}
+                <input type="hidden" value="" id='2fa' />       
             {% endif %}
             <!-- <p><input type = 'text' name = '2fa'/></p> -->
             <p>{{ form.submit() }}</p>
