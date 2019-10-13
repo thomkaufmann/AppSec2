@@ -6,7 +6,7 @@ from subprocess import check_output
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, IntegerField
-from wtforms.validators import DataRequired, Regexp, Length, NumberRange
+from wtforms.validators import InputRequired, Regexp, Length, NumberRange, Optional
 
 app = Flask(__name__)
 app.secret_key = 'asdfafhya78eh38w47hg3i4ra'
@@ -128,8 +128,13 @@ def login():
          if len(rows) >= 1 and check_password_hash(rows[0]['password'],password):
             session['username'] = username
             session['is_authenticated'] = False  
-            form = User2FAForm()
-            form_type = '2FA'   
+            if rows[0]['pin'] is None:
+               session['is_authenticated'] = True
+               flash("Success: You are logged in!","result")
+               return redirect(url_for('spell_check'))                              
+            else:
+               form = User2FAForm()
+               form_type = '2FA'   
          else:
             flash("Incorrect username or password. Please try again.","result")
          
@@ -151,25 +156,25 @@ def check_words(filename):
     return stdout
 
 class UserRegisterForm(FlaskForm):
-   uname = StringField('Username', validators=[DataRequired(), Regexp(r'^[\w.@+-]+$'), Length(min=4, max=25)])
-   # pword = PasswordField('Password', validators=[DataRequired(), Length(min=12)])
-   pword = PasswordField('Password', validators=[DataRequired()])
-   pin = IntegerField('Two-Factor Authentication', validators=[DataRequired(), NumberRange(min=1000000000,max=9999999999)], id='2fa')
-   # pin = StringField('Two-Factor Authentication', validators=[DataRequired()], id='2fa')
+   uname = StringField('Username', validators=[InputRequired(), Regexp(r'^[\w.@+-]+$'), Length(min=4, max=25)])
+   # pword = PasswordField('Password', validators=[InputRequired(), Length(min=12)])
+   pword = PasswordField('Password', validators=[InputRequired()])
+   pin = IntegerField('Two-Factor Authentication', validators=[Optional(), NumberRange(min=1000000000,max=9999999999)], id='2fa')
+   # pin = StringField('Two-Factor Authentication', validators=[InputRequired()], id='2fa')
    submit = SubmitField('Submit')
 
 class UserLoginForm(FlaskForm):
-   uname = StringField('Username', validators=[DataRequired(), Regexp(r'^[\w.@+-]+$')])
-   pword = PasswordField('Password', validators=[DataRequired()])
+   uname = StringField('Username', validators=[InputRequired(), Regexp(r'^[\w.@+-]+$')])
+   pword = PasswordField('Password', validators=[InputRequired()])
    submit = SubmitField('Submit')
 
 class User2FAForm(FlaskForm):
-   pin = IntegerField('Two-Factor Authentication', validators=[DataRequired(), NumberRange(min=1000000000,max=9999999999)], id='2fa')
-   # pin = StringField('Two-Factor Authentication', validators=[DataRequired()], id='2fa')
+   pin = IntegerField('Two-Factor Authentication', validators=[InputRequired(), NumberRange(min=1000000000,max=9999999999)], id='2fa')
+   # pin = StringField('Two-Factor Authentication', validators=[InputRequired()], id='2fa')
    submit = SubmitField('Submit')
 
 class SpellForm(FlaskForm):
-   inputtext = TextAreaField('Text', validators=[DataRequired()], id="inputtext", render_kw={"rows": 4, "cols": 100})
+   inputtext = TextAreaField('Text', validators=[InputRequired()], id="inputtext", render_kw={"rows": 4, "cols": 100})
    textout = TextAreaField('Text out', id="textout", render_kw={"disabled": "disabled", "rows": 4, "cols": 100})
    misspelled = TextAreaField('Misspelled', id="misspelled", render_kw={"disabled": "disabled", "rows": 4, "cols": 100})
    submit = SubmitField('Submit')
