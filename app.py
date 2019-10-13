@@ -111,7 +111,9 @@ def login():
                   flash("Success: You are logged in!","result")
                   return redirect(url_for('spell_check'))       
                else:
-                  flash("Two-factor failure. Please try again.","result")            
+                  flash("Two-factor failure. Please try again.","result")    
+            else:
+               flash("Failure. Please try again.","result")            
       else:      
          form = UserLoginForm()
          form_type = 'Login'
@@ -141,8 +143,8 @@ def login():
                   form_type = '2FA'   
             else:
                flash("Incorrect username or password. Please try again.","result")
-      else:
-         flash("Failure. Please try again.","result")
+         else:
+            flash("Failure. Please try again.","result")
    return render_template("form.html", type = form_type, form = form)      
 
 @app.route('/logout')
