@@ -162,7 +162,7 @@ class UserRegisterForm(FlaskForm):
    uname = StringField('Username', validators=[InputRequired(), Regexp(r'^[\w.@+-]+$'), Length(min=4, max=25)])
    # pword = PasswordField('Password', validators=[InputRequired(), Length(min=12)])
    pword = PasswordField('Password', validators=[InputRequired()])
-   pin = IntegerField('Two-Factor Authentication', validators=[Optional(), NumberRange(min=1000000000,max=9999999999)], id='2fa')
+   pin = IntegerField('Two-Factor Authentication', validators=[Optional(), NumberRange(min=10000000000,max=99999999999)], id='2fa')
    # pin = StringField('Two-Factor Authentication', validators=[InputRequired()], id='2fa')
    submit = SubmitField('Submit')
 
@@ -172,7 +172,7 @@ class UserLoginForm(FlaskForm):
    submit = SubmitField('Submit')
 
 class User2FAForm(FlaskForm):
-   pin = IntegerField('Two-Factor Authentication', validators=[InputRequired(), NumberRange(min=1000000000,max=9999999999)], id='2fa')
+   pin = IntegerField('Two-Factor Authentication', validators=[InputRequired(), NumberRange(min=10000000000,max=99999999999)], id='2fa')
    # pin = StringField('Two-Factor Authentication', validators=[InputRequired()], id='2fa')
    submit = SubmitField('Submit')
 
