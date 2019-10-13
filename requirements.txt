@@ -1,4 +1,2 @@
-subprocess
-werkzeug.security
-flask_wtf
 wtforms
+flask_wtf
