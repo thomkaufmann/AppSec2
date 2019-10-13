@@ -1,4 +1,21 @@
 <html>
+    <head>
+        <style>
+            ul {
+                list-style-type: none;
+                padding: 0 0 20px 0;
+            }
+            ul li {
+                float: left;
+            }
+            li a {
+                padding-right: 16px;
+            }
+            h1 {
+                clear: both;
+            }
+        </style>
+    </head>
    <body>
        <ul>
             <li><a href="{{ url_for('register') }}">Register</a></li>
@@ -6,6 +23,7 @@
             <li><a href="{{ url_for('spell_check') }}">Spell Check</a></li>
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
        </ul>
+       <h1>{{ "Register" if (type == 'Register') else "Login" }}</h1>   
         
        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -14,7 +32,7 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}       
-        <h1>{{ "Register" if (type == 'Register') else "Login" }}</h1>   
+        
         <form action = "/{{ 'register' if (type == 'Register') else 'login' }}" method = "POST">
             {{ form.csrf_token }}
             {% if type != '2FA' %}
@@ -29,13 +47,8 @@
                 {% for error in form.pword.errors %}
                 <p style="color: red;">[{{ error }}]</p>
                 {% endfor %}   
-                <p>{{ form.pin.label }}</p> 
-                <p>{{ form.pin(size=20) }}</p>   
-                {% for error in form.pin.errors %}
-                <p style="color: red;">[{{ error }}]</p>
-                {% endfor %}  
             {% endif %}  
-            {% if type == 'xLogin' %}
+            {% if type != 'Login' %}
                 <!-- <p><input type = 'password' name = 'pword'/></p> -->
                 <p>{{ form.pin.label }}</p> 
                 <p>{{ form.pin(size=20) }}</p>   
