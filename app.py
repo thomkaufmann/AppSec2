@@ -86,13 +86,13 @@ def register():
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
-   if request.method == "POST":
-      if 'username' in session: 
-         if session['is_authenticated']:  
-            return redirect(url_for('spell_check'))
-         else:
-            form = User2FAForm()
-            form_type = '2FA'
+   if 'username' in session: 
+      if session['is_authenticated']:  
+         return redirect(url_for('spell_check'))
+      else:
+         form = User2FAForm()
+         form_type = '2FA'
+         if request.method == 'POST':
             if form.validate_on_submit():
                username = session['username']
                pin = form.pin.data
@@ -111,40 +111,39 @@ def login():
                   flash("Success: You are logged in!","result")
                   return redirect(url_for('spell_check'))       
                else:
-                  flash("Two-factor failure. Please try again.","result")    
+                  flash("Two-factor failure. Please try again.","result") 
             else:
-               flash("Failure. Please try again.","result")            
-      else:      
-         form = UserLoginForm()
-         form_type = 'Login'
-         if form.validate_on_submit():
-            
-            username = form.uname.data
-            password = form.pword.data
-            
-            con = sql.connect("database.db")
-            con.row_factory = sql.Row
-            
-            cur = con.cursor()
-            cur.execute("SELECT * FROM users WHERE username = ?",[username] )
-            
-            rows = cur.fetchall()
-            con.close()
+               flash("Failure. Please try again.","result")              
+   else:      
+      form = UserLoginForm()
+      form_type = 'Login'
+      if form.validate_on_submit():
+         
+         username = form.uname.data
+         password = form.pword.data
+         
+         con = sql.connect("database.db")
+         con.row_factory = sql.Row
+         
+         cur = con.cursor()
+         cur.execute("SELECT * FROM users WHERE username = ?",[username] )
+         
+         rows = cur.fetchall()
+         con.close()
 
-            if len(rows) >= 1 and check_password_hash(rows[0]['password'],password):
-               session['username'] = username
-               session['is_authenticated'] = False  
-               if rows[0]['pin'] is None:
-                  session['is_authenticated'] = True
-                  flash("Success: You are logged in!","result")
-                  return redirect(url_for('spell_check'))                              
-               else:
-                  form = User2FAForm()
-                  form_type = '2FA'   
+         if len(rows) >= 1 and check_password_hash(rows[0]['password'],password):
+            session['username'] = username
+            session['is_authenticated'] = False  
+            if rows[0]['pin'] is None:
+               session['is_authenticated'] = True
+               flash("Success: You are logged in!","result")
+               return redirect(url_for('spell_check'))                              
             else:
-               flash("Incorrect username or password. Please try again.","result")
+               form = User2FAForm()
+               form_type = '2FA'   
          else:
-            flash("Failure. Please try again.","result")
+            flash("Incorrect username or password. Please try again.","result")
+         
    return render_template("form.html", type = form_type, form = form)      
 
 @app.route('/logout')
