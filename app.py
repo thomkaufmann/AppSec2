@@ -54,31 +54,34 @@ def register():
 
    form = UserRegisterForm()
    form_type = "Register"
-   if form.validate_on_submit():
-      username = form.uname.data
-      password = form.pword.data
-      pin = form.pin.data
-      with sql.connect("database.db") as con:
-         cur = con.cursor()
-         if username != '' and password != '' and pin != '':
-            con.row_factory = sql.Row
-            cur.execute("SELECT * FROM users WHERE username = ? ",[username])
-            rows = cur.fetchall()
-            if len(rows) >= 1:
-               flash("Failure: Account already exists. Please login or select a different username.","success")
-               return redirect(url_for('login'))  
+   if request.method == "POST":
+      if form.validate_on_submit():
+         username = form.uname.data
+         password = form.pword.data
+         pin = form.pin.data
+         with sql.connect("database.db") as con:
+            cur = con.cursor()
+            if username != '' and password != '' and pin != '':
+               con.row_factory = sql.Row
+               cur.execute("SELECT * FROM users WHERE username = ? ",[username])
+               rows = cur.fetchall()
+               if len(rows) >= 1:
+                  flash("Failure: Account already exists. Please login or select a different username.","success")
+                  return redirect(url_for('login'))  
+               else:
+                  password = generate_password_hash(password)
+                  # pin = generate_password_hash(pin)
+                  cur.execute("INSERT INTO users (username,password,pin) VALUES (?,?,?)",(username,password,pin))
+                  
+                  con.commit()
+                  # session['username'] = username
+                  flash("Success: Account registered!","success")
+                  return redirect(url_for('login'))  
             else:
-               password = generate_password_hash(password)
-               # pin = generate_password_hash(pin)
-               cur.execute("INSERT INTO users (username,password,pin) VALUES (?,?,?)",(username,password,pin))
-               
-               con.commit()
-               # session['username'] = username
-               flash("Success: Account registered!","success")
-               return redirect(url_for('login'))  
-         else:
-            flash("Failure: Invalid account details. Please try again.","success")
-         con.close()
+               flash("Failure: Invalid account details. Please try again.","success")
+            con.close()
+      else:   
+         flash("Failure: Please try again.","success")
    return render_template("form.html", type = form_type, form = form)
 
 @app.route('/login', methods = ['POST', 'GET'])
