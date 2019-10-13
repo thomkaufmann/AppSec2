@@ -16,8 +16,8 @@ def index():
    #if logged in, send to spell check form, otherwise send to login
    if 'username' in session and session['is_authenticated']: 
       return redirect(url_for('spell_check'))
-   
-   return redirect(url_for('login'))
+   else:
+      return redirect(url_for('login'))
 
 @app.route("/spell_check", methods = ['POST', 'GET'])
 def spell_check():
@@ -49,6 +49,10 @@ def spell_check():
 
 @app.route('/register', methods = ['POST', 'GET'])
 def register():
+   if request.method == 'GET':
+      #log them out
+      session.pop('username', None)
+      session.pop('is_authenticated', None)   
    if 'username' in session and session['is_authenticated']: 
       return redirect(url_for('spell_check'))
 
@@ -83,6 +87,10 @@ def register():
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
+   if request.method == 'GET':
+      #log them out
+      session.pop('username', None)
+      session.pop('is_authenticated', None)
    if 'username' in session: 
       if session['is_authenticated']:  
          return redirect(url_for('spell_check'))
@@ -147,9 +155,9 @@ def logout():
    session.pop('is_authenticated', None)
    return redirect(url_for('login'))
 
-@app.errorhandler(404)
-def page_not_found(e):
-   return redirect(url_for('index'))
+# @app.errorhandler(404)
+# def page_not_found(e):
+#    return redirect(url_for('index'))
 
 def check_words(filename):
     stdout = check_output(['./a.out',filename, 'wordlist.txt']).decode('utf-8').replace('\n',', ')[:-2]
