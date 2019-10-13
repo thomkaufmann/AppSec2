@@ -16,8 +16,8 @@ def index():
    #if logged in, send to spell check form, otherwise send to login
    if 'username' in session and session['is_authenticated']: 
       return redirect(url_for('spell_check'))
-   else:
-      return redirect(url_for('login'))
+   
+   return redirect(url_for('login'))
 
 @app.route("/spell_check", methods = ['POST', 'GET'])
 def spell_check():
@@ -49,10 +49,6 @@ def spell_check():
 
 @app.route('/register', methods = ['POST', 'GET'])
 def register():
-   if request.method == 'GET':
-      #log them out
-      session.pop('username', None)
-      session.pop('is_authenticated', None)   
    if 'username' in session and session['is_authenticated']: 
       return redirect(url_for('spell_check'))
 
@@ -87,10 +83,6 @@ def register():
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
-   if request.method == 'GET':
-      #log them out
-      session.pop('username', None)
-      session.pop('is_authenticated', None)
    if 'username' in session: 
       if session['is_authenticated']:  
          return redirect(url_for('spell_check'))
