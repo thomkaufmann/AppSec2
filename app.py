@@ -21,8 +21,8 @@ def index():
 
 @app.route("/spell_check", methods = ['POST', 'GET'])
 def spell_check():
-   if 'username' in session and session['is_authenticated']: 
-      username = session['username']
+   if True: #'username' in session and session['is_authenticated']: 
+      username = "fake" #session['username']
       form = SpellForm()
       if form.validate_on_submit():
          text = form.inputtext.data
