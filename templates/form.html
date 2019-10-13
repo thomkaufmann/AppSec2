@@ -29,8 +29,13 @@
                 {% for error in form.pword.errors %}
                 <p style="color: red;">[{{ error }}]</p>
                 {% endfor %}   
+                <p>{{ form.pin.label }}</p> 
+                <p>{{ form.pin(size=20) }}</p>   
+                {% for error in form.pin.errors %}
+                <p style="color: red;">[{{ error }}]</p>
+                {% endfor %}  
             {% endif %}  
-            {% if type != 'Login' %}
+            {% if type == 'xLogin' %}
                 <!-- <p><input type = 'password' name = 'pword'/></p> -->
                 <p>{{ form.pin.label }}</p> 
                 <p>{{ form.pin(size=20) }}</p>   
