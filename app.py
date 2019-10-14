@@ -22,7 +22,6 @@ def index():
 @app.route("/spell_check", methods = ['POST', 'GET'])
 def spell_check():
    if 'username' in session: 
-      username = session['username']
       form = SpellForm()
       if form.validate_on_submit():
          text = form.inputtext.data
@@ -43,7 +42,7 @@ def spell_check():
             else:
                print("Error: %s file not found" % filename)            
 
-      return render_template("spell_check.html", username = username, form = form)
+      return render_template("spell_check.html", form = form)
    else:
       return redirect(url_for('login'))
 
@@ -53,7 +52,9 @@ def register():
       return redirect(url_for('spell_check'))
 
    form = UserForm()
+   # form_type is used to put a title on the html view and to set the form action (register or login)
    form_type = "Register"
+
    if request.method == "POST":
       if form.validate_on_submit():
          username = form.uname.data
@@ -70,11 +71,8 @@ def register():
                   return redirect(url_for('login'))  
                else:
                   password = generate_password_hash(password)
-                  # pin = generate_password_hash(pin)
                   cur.execute("INSERT INTO users (username,password,pin) VALUES (?,?,?)",(username,password,pin))
-                  
                   con.commit()
-                  # session['username'] = username
                   flash("Success: Account registered!","success")
                   return redirect(url_for('login'))  
             else:
@@ -90,6 +88,7 @@ def login():
       return redirect(url_for('spell_check'))
    
    form = UserForm()
+   # form_type is used to put a title on the html view and to set the form action (register or login)
    form_type = 'Login'
    if request.method == 'POST':
       if form.validate_on_submit():
