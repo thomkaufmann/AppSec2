@@ -14,14 +14,14 @@ app.secret_key = 'asdfafhya78eh38w47hg3i4ra'
 @app.route("/")
 def index():
    #if logged in, send to spell check form, otherwise send to login
-   if 'username' in session and session['is_authenticated']: 
+   if 'username' in session: 
       return redirect(url_for('spell_check'))
    
    return redirect(url_for('login'))
 
 @app.route("/spell_check", methods = ['POST', 'GET'])
 def spell_check():
-   if 'username' in session and session['is_authenticated']: 
+   if 'username' in session: 
       username = session['username']
       form = SpellForm()
       if form.validate_on_submit():
@@ -49,10 +49,10 @@ def spell_check():
 
 @app.route('/register', methods = ['POST', 'GET'])
 def register():
-   if 'username' in session and session['is_authenticated']: 
+   if 'username' in session: 
       return redirect(url_for('spell_check'))
 
-   form = UserRegisterForm()
+   form = UserForm()
    form_type = "Register"
    if request.method == "POST":
       if form.validate_on_submit():
@@ -87,40 +87,16 @@ def register():
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
    if 'username' in session: 
-      if session['is_authenticated']:  
-         return redirect(url_for('spell_check'))
-      else:
-         form = User2FAForm()
-         form_type = '2FA'
-         if request.method == 'POST':
-            if form.validate_on_submit():
-               username = session['username']
-               pin = form.pin.data
-               
-               con = sql.connect("database.db")
-               con.row_factory = sql.Row
-               
-               cur = con.cursor()
-               cur.execute("SELECT * FROM users WHERE username = ?",[username] )
-               
-               rows = cur.fetchall()
-               con.close()
-
-               if len(rows) >= 1 and rows[0]['pin'] == pin:
-                  session['is_authenticated'] = True
-                  flash("Success: You are logged in!","result")
-                  return redirect(url_for('spell_check'))       
-               else:
-                  flash("Two-factor failure. Please try again.","result") 
-            else:
-               flash("Failure. Please try again.","result")              
-   else:      
-      form = UserLoginForm()
-      form_type = 'Login'
+      return redirect(url_for('spell_check'))
+   
+   form = UserForm()
+   form_type = 'Login'
+   if request.method == 'POST':
       if form.validate_on_submit():
          
          username = form.uname.data
          password = form.pword.data
+         pin = form.pin.data
          
          con = sql.connect("database.db")
          con.row_factory = sql.Row
@@ -132,51 +108,33 @@ def login():
          con.close()
 
          if len(rows) >= 1 and check_password_hash(rows[0]['password'],password):
-            session['username'] = username
-            session['is_authenticated'] = False  
-            if rows[0]['pin'] is None:
-               session['is_authenticated'] = True
+            if (pin == rows[0]['pin']) or (pin == "" and rows[0]['pin'] is None):
+               session['username'] = username
                flash("Success: You are logged in!","result")
                return redirect(url_for('spell_check'))                              
             else:
-               form = User2FAForm()
-               form_type = '2FA'   
+               flash("Two-factor failure. Please try again.","result")   
          else:
             flash("Incorrect username or password. Please try again.","result")
-         
+      else:
+         flash("Failure: Please try again.","result")
+
    return render_template("form.html", type = form_type, form = form)      
 
 @app.route('/logout')
 def logout():
    # remove the username from the session if it is there
    session.pop('username', None)
-   session.pop('is_authenticated', None)
    return redirect(url_for('login'))
-
-# @app.errorhandler(404)
-# def page_not_found(e):
-#    return redirect(url_for('index'))
 
 def check_words(filename):
     stdout = check_output(['./a.out',filename, 'wordlist.txt']).decode('utf-8').replace('\n',', ')[:-2]
     return stdout
 
-class UserRegisterForm(FlaskForm):
+class UserForm(FlaskForm):
    uname = StringField('Username', validators=[InputRequired(), Regexp(r'^[\w.@+-]+$'), Length(min=4, max=25)])
-   # pword = PasswordField('Password', validators=[InputRequired(), Length(min=12)])
    pword = PasswordField('Password', validators=[InputRequired()])
    pin = IntegerField('Two-Factor Authentication', validators=[Optional(), NumberRange(min=10000000000,max=99999999999)], id='2fa')
-   # pin = StringField('Two-Factor Authentication', validators=[InputRequired()], id='2fa')
-   submit = SubmitField('Submit')
-
-class UserLoginForm(FlaskForm):
-   uname = StringField('Username', validators=[InputRequired(), Regexp(r'^[\w.@+-]+$')])
-   pword = PasswordField('Password', validators=[InputRequired()])
-   submit = SubmitField('Submit')
-
-class User2FAForm(FlaskForm):
-   pin = IntegerField('Two-Factor Authentication', validators=[InputRequired(), NumberRange(min=10000000000,max=99999999999)], id='2fa')
-   # pin = StringField('Two-Factor Authentication', validators=[InputRequired()], id='2fa')
    submit = SubmitField('Submit')
 
 class SpellForm(FlaskForm):
