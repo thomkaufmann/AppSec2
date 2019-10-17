@@ -1,8 +1,10 @@
 import sqlite3
 
-conn = sqlite3.connect('database.db')
-print("Opened database successfully")
+with open('schema.sql', 'r') as sql_file:
+    sql_script = sql_file.read()
 
-conn.execute('CREATE TABLE users (username TEXT, password TEXT, pin INTEGER)')
-print("Table created successfully")
-conn.close()
+db = sqlite3.connect('database.db')
+cursor = db.cursor()
+cursor.executescript(sql_script)
+db.commit()
+db.close()
