@@ -15,14 +15,14 @@ class FlaskTestCase(unittest.TestCase):
         self.app = app.test_client()
 
     def test_route_login(self):
-        res = self.app.get("/login")
-        assert res.status_code == 200
-        assert b"Login" in res.data
+        response = self.app.get("/login")
+        assert response.status_code == 200
+        assert b"Login" in response.data
 
     def test_route_register(self):
-        res = self.app.get("/register")
-        assert res.status_code == 200
-        assert b"Register" in res.data
+        response = self.app.get("/register")
+        assert response.status_code == 200
+        assert b"Register" in response.data
 
     def test_register(self):
         response = self.app.get('/register')
@@ -38,7 +38,6 @@ class FlaskTestCase(unittest.TestCase):
             pin=pin
         )
         response = self.app.post('/register', data=data, follow_redirects=True)
-        # print("response: %s" % response.data)
         assert b"Success" in response.data  
   
     def test_login_success(self):
@@ -79,7 +78,37 @@ class FlaskTestCase(unittest.TestCase):
         )        
         response = self.app.post('/login', data=data, follow_redirects=True)
         assert b"Incorrect username or password" in response.data                       
-            
+
+    def test_register_existing_user(self):
+        response = self.app.get('/register')
+        csrf_token = bs4.BeautifulSoup(response.data,"html.parser").find('input', {'id': 'csrf_token'}).get('value')      
+        uname = "admin"
+        pword = "sacamano"
+        pin = ""
+        data = dict(
+            csrf_token=csrf_token,
+            uname=uname,
+            pword=pword,
+            pin=pin
+        )        
+        response = self.app.post('/register', data=data, follow_redirects=True)
+        assert b"Account already exists" in response.data  
+
+    def test_logout(self):
+        response = self.app.get('/login')
+        csrf_token = bs4.BeautifulSoup(response.data,"html.parser").find('input', {'id': 'csrf_token'}).get('value')      
+        data = dict(
+            csrf_token=csrf_token,
+            uname=UNAME,
+            pword=PWORD,
+            pin=PIN
+        )
+        response = self.app.post('/login', data=data, follow_redirects=True)
+        assert b"Success" in response.data  
+        response = self.app.get('/logout', data=data, follow_redirects=True)
+        assert response.status_code == 200
+        assert b"Login" in response.data
+        
     def test_csrf(self):
         data = dict(
             csrf_token=str(random.randint(1, 1000000)),
