@@ -88,7 +88,37 @@ class FlaskTestCase(unittest.TestCase):
             pin=PIN
         )
         response = self.app.post('/register', data=data, follow_redirects=True)
-        assert b"try again" in response.data          
+        assert b"try again" in response.data    
+
+    def test_xss(self):
+        #test login/register inputs for xss vulnerability
+        data = dict(
+            csrf_token=str(random.randint(1, 1000000)),
+            uname="<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>",
+            pword="<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>",
+            pin="<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>"
+        )
+        response = self.app.post('/register', data=data, follow_redirects=True)
+        assert b"This is remote text" not in response.data   
+
+    def test_xss_spell_check(self):
+        response = self.app.get('/login')
+        csrf_token = bs4.BeautifulSoup(response.data,"html.parser").find('input', {'id': 'csrf_token'}).get('value')
+        data = dict(
+            csrf_token=csrf_token,
+            uname=UNAME,
+            pword=PWORD,
+            pin=PIN
+        )
+        response = self.app.post('/login', data=data, follow_redirects=True) 
+        
+        inputtext = "<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>"
+        data = dict(
+            csrf_token=csrf_token,
+            inputtext=inputtext
+        )
+        response = self.app.post('/spell_check', data=data, follow_redirects=True) 
+        assert b"This is remote text" not in response.data          
 
     def test_spell_check(self):
         response = self.app.get('/login')
