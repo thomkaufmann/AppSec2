@@ -1,20 +1,7 @@
 <html>
     <head>
-        <style>
-            ul {
-                list-style-type: none;
-                padding: 0 0 20px 0;
-            }
-            ul li {
-                float: left;
-            }
-            li a {
-                padding-right: 16px;
-            }
-            h1 {
-                clear: both;
-            }
-        </style>
+        <title>{{ type }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
     <body>
         <ul>
@@ -38,17 +25,17 @@
             <p>{{ form.uname.label }}</p>
             <p>{{ form.uname(size=20) }}</p>
             {% for error in form.uname.errors %}
-            <p style="color: red;">[{{ error }}]</p>
+            <p class="error">[{{ error }}]</p>
             {% endfor %}                     
             <p>{{ form.pword.label }}</p> 
             <p>{{ form.pword(size=20) }}</p>     
             {% for error in form.pword.errors %}
-            <p style="color: red;">[{{ error }}]</p>
+            <p class="error">[{{ error }}]</p>
             {% endfor %}   
             <p>{{ form.pin.label }}</p> 
             <p>{{ form.pin(size=20) }}</p>   
             {% for error in form.pin.errors %}
-            <p style="color: red;">[{{ error }}]</p>
+            <p class="error">[{{ error }}]</p>
             {% endfor %} 
             <p>{{ form.submit() }}</p>
         </form>

@@ -10,7 +10,21 @@ from wtforms.validators import InputRequired, Regexp, Length, NumberRange, Optio
 
 def create_app():
    app = Flask(__name__)
-   app.secret_key = 'asdfafhya78eh38w47hg3i4ra'
+   app.config.update(
+      SESSION_COOKIE_SECURE=False, # should be set to true upon adding SSL
+      SESSION_COOKIE_HTTPONLY=True,
+      SESSION_COOKIE_SAMESITE='Strict',
+      TESTING=True,
+      SECRET_KEY=os.urandom(16)
+   )
+
+   @app.after_request
+   def set_headers(response):
+      response.headers['Content-Security-Policy'] = "default-src 'self'"
+      response.headers["X-Frame-Options"] = "SAMEORIGIN"
+      response.headers['X-Content-Type-Options'] = 'nosniff'
+      response.headers['X-XSS-Protection'] = '1; mode=block'      
+      return response
 
    @app.route("/")
    def index():
@@ -82,6 +96,7 @@ def create_app():
                con.close()
          else:   
             flash("Failure: Please try again.","success")
+
       return render_template("form.html", type = form_type, form = form)
 
    @app.route('/login', methods = ['POST', 'GET'])
@@ -124,8 +139,7 @@ def create_app():
 
    @app.route('/logout')
    def logout():
-      # remove the username from the session if it is there
-      session.pop('username', None)
+      session.clear()
       return redirect(url_for('login'))
 
    def check_words(filename):
